@@ -47,6 +47,7 @@ void writeFile(bTree* ptr_tree, bTreeNode* p, int pos) {
 }
 
 void readFile(bTree* ptr_tree, bTreeNode* p, int pos) {    
+    //Copia as informações de ptr_tree(memoria secundaria) para p)memoria principal)
     fseek(ptr_tree->fp, pos * sizeof(bTreeNode), SEEK_SET);
     fread(p, sizeof(bTreeNode), 1, ptr_tree->fp);
 }
@@ -216,40 +217,47 @@ void insert(bTree* tree,recordNode* record)
 }
 
 void traverse(bTree* tree, int root) {
-    
-    if(-1 == root) {    
+    /*
+    le da memória secundária as informações contidas no nó  bTree* tree e as passas para a v
+    ariável toPrint(tipo bTree*,contida em memória principal) ,que é utilizada pela função 
+    dispNode que printa as informações contidas em to print. Esse processo é feito de forma 
+    recursiva pela função traverse de forma a ser executado no primeiro nó passado e seus 
+    descendentes.
+    */
+    if(-1 == root) {//se o nó não existe, retorna
         return;
     }
 
-    bTreeNode *toPrint = malloc(sizeof(bTreeNode));
-    readFile(tree, toPrint, root);
-    dispNode(toPrint);
-
-    for(int i = 0; i < 2*t; i++) {
+    bTreeNode *toPrint = malloc(sizeof(bTreeNode));//Aloca toPrint na memoria
+    readFile(tree, toPrint, root);//copia as informações do nó tree para toPrint
+    dispNode(toPrint);//Printa as principais informações de toPrint
+    
+    for(int i = 0; i < 2*t; i++) {//realiza a mesma operação de forma recursiva para os nós filhos
         traverse(tree, toPrint->children[i]);
     }
 
-    free(toPrint);
+    free(toPrint);//libera a memoria /
 }
 
 void dispNode(bTreeNode* node)
 {
-	printf("Position in node:%d\n",node->pos );
-    printf("Number of Records:%d\n",node->noOfRecs );
-	printf("Is leaf?:%d\n",node->isLeaf );
+    /*A função printa as seguintes propiedas do nó:Posição,quantidade de registros,se é folha, 
+    as chaves dos registros(em ordem) e as posições dos filhos(-1 se não existe o filho).
+    */
+	printf("Position in node:%d\n",node->pos );//Posição do nó
+    printf("Number of Records:%d\n",node->noOfRecs );//quantidade de registros
+	printf("Is leaf?:%d\n",node->isLeaf );//se é folha
 	printf("Keys:\n");
-	for(int i = 0; i < node->noOfRecs; i++)
+	for(int i = 0; i < node->noOfRecs; i++)//printa as chaves dos registros
 	{
 		printf("%d ", node->recordArr[i]->key);
 	}
-	printf("\n");
-	printf("Links:\n");
-	for (int i = 0; i < 2*t; ++i)
+	printf("\nLinks:\n");
+	for (int i = 0; i < 2*t; ++i)//printa a posição dos nós filhos
 	{
-		printf("%d ",node->children[i] );
+        printf("%d ",node->children[i] );
 	}
-	printf("\n");
-    printf("\n");
+	printf("\n\n");
 }
 
 recordNode* searchRecursive(bTree* tree, int key, bTreeNode* root) {
