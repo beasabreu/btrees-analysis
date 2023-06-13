@@ -2,7 +2,7 @@
 int main(int argc, char const *argv[])
 {
 
-	if(argc==1)
+	if(argc==1 && strcmp(argv[1],"-b")!=0 && strcmp(argv[1],"-d")!=0 && strcmp(argv[1],"-s")!=0)
 	{
 		printf("Please enter one of the options below:\n");
 		printf("Commands:\n");
@@ -12,6 +12,10 @@ int main(int argc, char const *argv[])
 		printf("-d [KEY] -->for deleting a [KEY].\n");
 		printf("Exiting now\n");
 		exit(0);
+	}
+	if(argc!=3 && strcmp(argv[1],"-b")){
+			printf("The [key] has not passed %d --- %s\n",argc,argv[1]);
+			exit(0);
 	}
 	
 	int len,i;
@@ -25,6 +29,7 @@ int main(int argc, char const *argv[])
     {
     	insert(tree,&records[i]);
     }
+	
 
     if(!strcmp(argv[1],"-d"))
     {
@@ -41,12 +46,13 @@ int main(int argc, char const *argv[])
     	}
     }
 
-        traverse(tree, tree->root);
+    traverse(tree, tree->root);
 
 	if(!strcmp(argv[1],"-s"))
     {
 	    // printf("Time Taken to build tree: %f seconds\n",timeToBuild);
 	    int key;
+		
 	    sscanf(argv[2],"%d",&key);
 	    recordNode* res = search(tree,key);
 
@@ -62,7 +68,7 @@ int main(int argc, char const *argv[])
 		} else
 			printf("Record not found!");
     }
-
 	free(records);
 	free(tree);
+	return 0;
 }	
