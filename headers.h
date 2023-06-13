@@ -15,25 +15,29 @@ struct rec
 };
 typedef struct rec recordNode;
 
+// Structure to represent a record in the B-tree
 struct bTreeNode
 {
-	bool isLeaf; 
-	int pos; 
-	int noOfRecs;
-	recordNode* recordArr[2 * t - 1];
-	int children[2 * t]; 
+	bool isLeaf; // Flag indicating if the node is a leaf node
+	int pos; // Position of the node in the file
+	int noOfRecs; // Number of records in the node
+	recordNode* recordArr[2 * t - 1]; // Pointers to the child nodes
+	int children[2 * t]; // Array of record nodes
 };
 typedef struct bTreeNode bTreeNode;
 
+// Structure for the B-tree
 struct tree
 {
-	char fileName[20];
-	FILE* fp;
-	int root;
-	int nextPos;
+	char fileName[20]; // Name of the file containing the B-tree
+	FILE* fp; // File pointer
+	int root; // Position of the root node in the file
+	int nextPos; // Position for the next node to be inserted in the file
 };
 typedef struct tree bTree;
 
+
+//Coments for methods in implementation.c
 bTree* createTree(char* fileName,bool mode);
 bTreeNode* nodeInit(bTreeNode* node,bool isLeaf,bTree* tree);
 void insert(bTree* tree,recordNode* record);

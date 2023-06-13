@@ -1,4 +1,11 @@
 #include "headers.h"
+
+// Creates a new B-tree or opens an existing B-tree from the file
+// Parameters:
+// - fileName: The name of the file containing the B-tree
+// - mode: The mode for opening the file, true for creating a new file, false for opening an existing file
+// Returns:
+// - A pointer to the created or opened B-tree
 bTree* createTree(char* fileName,bool mode)
 {
 	bTree* tree = malloc(sizeof(bTree));
@@ -22,6 +29,13 @@ bTree* createTree(char* fileName,bool mode)
     return tree;
 }
 
+// Initializes a B-tree node
+// Parameters:
+// - node: The B-tree node to be initialized
+// - isLeaf: Flag indicating if the node is a leaf node
+// - tree: The B-tree to which the node belongs
+// Returns:
+// - The initialized B-tree node
 bTreeNode* nodeInit(bTreeNode* node,bool isLeaf,bTree* tree)
 {
 	node->isLeaf = isLeaf;
@@ -36,6 +50,11 @@ bTreeNode* nodeInit(bTreeNode* node,bool isLeaf,bTree* tree)
 	return node;
 }
 
+// Writes a B-tree node to the file
+// Parameters:
+// - ptr_tree: Pointer to the B-tree
+// - p: The B-tree node to be written
+// - pos: Position of the node in the file
 void writeFile(bTree* ptr_tree, bTreeNode* p, int pos) {
     if(pos == -1) {
         pos = ptr_tree->nextPos++;
@@ -46,12 +65,25 @@ void writeFile(bTree* ptr_tree, bTreeNode* p, int pos) {
     
 }
 
+// Reads a B-tree node from the file
+// Parameters:
+// - ptr_tree: Pointer to the B-tree
+// - p: The B-tree node to be read
+// - pos: Position of the node in the file
 void readFile(bTree* ptr_tree, bTreeNode* p, int pos) {    
     //Copia as informações de ptr_tree(memoria secundaria) para p)memoria principal)
     fseek(ptr_tree->fp, pos * sizeof(bTreeNode), SEEK_SET);
     fread(p, sizeof(bTreeNode), 1, ptr_tree->fp);
 }
 
+// Enters data into a record node
+// Parameters:
+// - record: The record node to be filled with data
+// - id_num: The ID number of the record
+// - country: The country associated with the record
+// - grate: The grade of the record
+// - score: The score of the record
+// - rate: The rating of the record
 void enterData(recordNode* record, int id_num, char country[], char grate[], int score, int rate) {
     
     record->key = id_num;
@@ -63,6 +95,12 @@ void enterData(recordNode* record, int id_num, char country[], char grate[], int
     return;
 }
 
+// Reads data from a file and returns an array of record nodes
+// Parameters:
+// - filepath: The path to the file containing the data
+// - len: The length of the data to be read
+// Returns:
+// - An array of record nodes containing the read data
 recordNode* getData(char *filepath, int len) {
     
     recordNode *recordArr = malloc(sizeof(recordNode)*len);
@@ -82,6 +120,12 @@ recordNode* getData(char *filepath, int len) {
     return recordArr;
 }
 
+// Splits a child node during insertion
+// Parameters:
+// - tree: The B-tree
+// - x: The parent node that needs to be split
+// - i: The index of the child node to be split
+// - y: The child node to be split
 void splitChild(bTree* tree, bTreeNode* x, int i, bTreeNode* y)
 {
 	bTreeNode* z = malloc(sizeof(bTreeNode));
@@ -163,6 +207,16 @@ void insertNonFull(bTree* tree,bTreeNode* x,recordNode* record)
 	}
 }
 
+// Inserts a record into the B-tree
+// Parameters:
+// - tree: The B-tree to insert the record into
+// - record: The record to be inserted
+// Description:
+// This function inserts a record into the B-tree. It starts by finding the appropriate
+// leaf node to insert the record. If the leaf node is not full, the record is directly
+// inserted. If the leaf node is full, a split operation is performed to create a new
+// leaf node and redistribute the records. The split operation may propagate upwards if
+// necessary to maintain the B-tree properties.
 void insert(bTree* tree,recordNode* record)
 {
 	if(tree->nextPos == 0) 
@@ -216,6 +270,14 @@ void insert(bTree* tree,recordNode* record)
 	}
 }
 
+// Traverses the B-tree and prints the nodes
+// Parameters:
+// - tree: The B-tree to be traversed and printed
+// - root: The root node of the B-tree
+// Description:
+// This function traverses the B-tree in a depth-first manner and prints the details of
+// each node encountered. It starts from the root node and recursively visits each child
+// node, printing their details. The traversal helps visualize the structure of the B-tree.
 void traverse(bTree* tree, int root) {
     /*
     le da memória secundária as informações contidas no nó  bTree* tree e as passas para a v
@@ -239,6 +301,12 @@ void traverse(bTree* tree, int root) {
     free(toPrint);//libera a memoria /
 }
 
+// Prints the details of a B-tree node
+// Parameters:
+// - node: The B-tree node to be displayed
+// Description:
+// This function prints the details of a B-tree node, including the keys and pointers to
+// child nodes. It helps in understanding the internal structure of the B-tree and its organization.
 void dispNode(bTreeNode* node)
 {
     /*A função printa as seguintes propiedas do nó:Posição,quantidade de registros,se é folha, 
@@ -284,6 +352,18 @@ recordNode* searchRecursive(bTree* tree, int key, bTreeNode* root) {
     }
 }
 
+
+// Searches for a record in the B-tree
+// Parameters:
+// - tree: The B-tree
+// - key: The key of the record to be searched
+// Returns:
+// - The record with the specified key, or NULL if not found
+// Description:
+// This function searches for a record with the specified key in the B-tree. It starts
+// from the root node and follows the appropriate child nodes based on the key values.
+// If the key is found in a leaf node, the corresponding record is returned. If the key
+// is not found, NULL is returned.
 recordNode* search(bTree* tree, int key) {
     
     bTreeNode* root = malloc(sizeof(bTreeNode));
@@ -295,6 +375,17 @@ recordNode* search(bTree* tree, int key) {
      
 }
 
+
+// Finds the index of a key in a B-tree node
+// Parameters:
+// - node: The B-tree node
+// - k: The key to be searched
+// Returns:
+// - The index of the key in the node, or -1 if not found
+// Description:
+// This function finds the index of a key in a B-tree node. It performs a binary search
+// to locate the position of the key within the node. If the key is found, its index is
+// returned. Otherwise, -1 is returned to indicate that the key is not present in the node.
 int findKey(bTreeNode* node, int k) {
     int idx=0;
     while (idx < node->noOfRecs && node->recordArr[idx]->key < k)
@@ -302,6 +393,16 @@ int findKey(bTreeNode* node, int k) {
     return idx;
 }
 
+
+// Removes a record from a leaf node
+// Parameters:
+// - tree: The B-tree
+// - node: The leaf node from which the record is to be removed
+// - idx: The index of the record to be removed
+// Description:
+// This function removes a record from a leaf node in the B-tree. It deletes the record
+// at the specified index and adjusts the remaining records to fill the gap. If necessary,
+// it may perform a redistribution or merge operation to maintain the B-tree properties.
 void removeFromLeaf (bTree* tree, bTreeNode *node, int idx) {
     for (int i=idx+1; i<node->noOfRecs; ++i){
 	    node->recordArr[i-1] = node->recordArr[i];
@@ -309,6 +410,11 @@ void removeFromLeaf (bTree* tree, bTreeNode *node, int idx) {
     node->noOfRecs--;
 }
  
+// Removes a record from a non-leaf node
+// Parameters:
+// - tree: The B-tree
+// - node: The non-leaf node from which the record is to be removed
+// - idx: The index of the record to be removed
 void removeFromNonLeaf(bTree* tree, bTreeNode *node, int idx) {
  
     int k = node->recordArr[idx]->key;
@@ -348,7 +454,11 @@ void removeFromNonLeaf(bTree* tree, bTreeNode *node, int idx) {
     free(sibling);
 }
 
-
+// Removes a node from the B-tree
+// Parameters:
+// - tree: The B-tree
+// - node: The node to be removed
+// - k: The key of the record to be removed
 void removeNode(bTree* tree, bTreeNode* node, int k) {
 
     int idx = findKey(node, k);
@@ -364,7 +474,7 @@ void removeNode(bTree* tree, bTreeNode* node, int k) {
     else {
        
         if (node->isLeaf) {
-		    return false;
+		    return;
        	}
  
         bool flag = idx==node->noOfRecs;
@@ -395,7 +505,13 @@ void removeNode(bTree* tree, bTreeNode* node, int k) {
     }
 }
 
-
+// Finds the predecessor of a key in the B-tree
+// Parameters:
+// - tree: The B-tree
+// - node: The node from which the predecessor is to be found
+// - idx: The index of the key in the node
+// Returns:
+// - The predecessor record of the specified key, or NULL if not found
 recordNode* getPred(bTree* tree, bTreeNode *node, int idx) {
     bTreeNode *curr = malloc(sizeof(bTreeNode));
     readFile(tree, curr, node->children[idx]);
@@ -408,7 +524,14 @@ recordNode* getPred(bTree* tree, bTreeNode *node, int idx) {
     free(curr);
     return result;
 }
- 
+
+// Finds the successor of a key in the B-tree
+// Parameters:
+// - tree: The B-tree
+// - node: The node from which the successor is to be found
+// - idx: The index of the key in the node
+// Returns:
+// - The successor record of the specified key, or NULL if not found
 recordNode* getSucc(bTree* tree, bTreeNode *node, int idx) {
  
     bTreeNode *curr = malloc(sizeof(bTreeNode));
@@ -423,7 +546,11 @@ recordNode* getSucc(bTree* tree, bTreeNode *node, int idx) {
     return result;
 }
  
-
+// Fills a child node with keys from its siblings or merges the child nodes
+// Parameters:
+// - tree: The B-tree
+// - node: The parent node containing the child nodes
+// - idx: The index of the child node to be filled or merged
 void fill(bTree* tree, bTreeNode *node, int idx) {
     bTreeNode *cPrev = malloc(sizeof(bTreeNode));
     bTreeNode *cSucc = malloc(sizeof(bTreeNode));
@@ -452,7 +579,16 @@ void fill(bTree* tree, bTreeNode *node, int idx) {
 
     return;
 }
- 
+
+// Borrows a key from the previous child node
+// Parameters:
+// - tree: The B-tree
+// - node: The node from which the key is to be borrowed
+// - idx: The index of the key in the node
+// Description:
+// This function borrows a key from the previous child node of a B-tree node. It updates
+// the node by moving the rightmost key from the left child node to the current node and
+// adjusting the pointers accordingly. This operation helps rebalance the B-tree after a deletion.
 void borrowFromPrev(bTree* tree, bTreeNode *node, int idx) {
     bTreeNode *child = malloc(sizeof(bTreeNode));
     bTreeNode *sibling = malloc(sizeof(bTreeNode));
@@ -490,7 +626,16 @@ void borrowFromPrev(bTree* tree, bTreeNode *node, int idx) {
 
     return;
 }
- 
+
+// Borrows a key from the next child node
+// Parameters:
+// - tree: The B-tree
+// - node: The node from which the key is to be borrowed
+// - idx: The index of the key in the node
+// Description:
+// This function borrows a key from the next child node of a B-tree node. It updates the
+// node by moving the leftmost key from the right child node to the current node and adjusting
+// the pointers accordingly. This operation helps rebalance the B-tree after a deletion.
 void borrowFromNext(bTree* tree, bTreeNode *node, int idx) {
  
     bTreeNode *child = malloc(sizeof(bTreeNode));
@@ -528,7 +673,19 @@ void borrowFromNext(bTree* tree, bTreeNode *node, int idx) {
 
     return;
 }
- 
+
+// Merges a child node with its sibling
+// Parameters:
+// - tree: The B-tree
+// - node: The parent node containing the child nodes
+// - idx: The index of the child node to be merged
+// Returns:
+// - The updated parent node after the merge operation
+// Description:
+// This function merges a child node with its sibling in a B-tree. It combines the keys and
+// child pointers of the two nodes and updates the parent node accordingly. This operation
+// helps maintain the B-tree properties by reducing the height of the tree and balancing
+// the keys among the child nodes.
 bTreeNode* merge(bTree* tree, bTreeNode *node, int idx) {
 
     bTreeNode *child = malloc(sizeof(bTreeNode));
